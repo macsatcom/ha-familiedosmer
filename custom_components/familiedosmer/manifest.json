@@ -1,0 +1,11 @@
+{
+  "domain": "familiedosmer",
+  "name": "FamilieDosmer",
+  "version": "0.1.0",
+  "documentation": "https://github.com/macsatcom/ha-familiedosmer",
+  "requirements": [],
+  "dependencies": [],
+  "codeowners": [],
+  "iot_class": "cloud_polling",
+  "config_flow": true
+}
