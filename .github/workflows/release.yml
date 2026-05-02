@@ -1,0 +1,30 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build release zip
+        run: |
+          find custom_components/familiedosmer -name '__pycache__' -type d -exec rm -rf {} + 2>/dev/null || true
+          mkdir -p release/custom_components
+          cp -r custom_components/familiedosmer release/custom_components/
+          cd release && zip -r ../familiedosmer.zip custom_components/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "v${{ github.ref_name }}"
+          body: "Release ${{ github.ref_name }} — see [CHANGELOG](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details."
+          files: familiedosmer.zip
+          generate_release_notes: true
