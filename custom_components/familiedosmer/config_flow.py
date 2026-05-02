@@ -5,7 +5,6 @@ from typing import Any
 import voluptuous as vol
 
 from homeassistant.config_entries import ConfigFlow, ConfigEntry
-from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import config_validation as cv
@@ -29,16 +28,13 @@ class FamilieDosmerConfigFlow(ConfigFlow, domain=DOMAIN):
     VERSION = 1
 
     def __init__(self) -> None:
-        self._host: str = ""
         self._token: str = ""
         self._profile: dict[str, Any] = {}
         self._reauth_entry: ConfigEntry | None = None
 
-    async def _validate_credentials(
-        self, host: str, token: str
-    ) -> dict[str, Any]:
+    async def _validate_credentials(self, token: str) -> dict[str, Any]:
         session = async_get_clientsession(self.hass)
-        api = FamilieDosmerApi(session, host, token)
+        api = FamilieDosmerApi(session, token)
         try:
             return await api.get_profile()
         except FamilieDosmerAuthError:
@@ -54,7 +50,7 @@ class FamilieDosmerConfigFlow(ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             try:
                 self._profile = await self._validate_credentials(
-                    user_input["host"], user_input["token"]
+                    user_input["token"]
                 )
             except CannotConnect:
                 errors["base"] = "cannot_connect"
@@ -64,7 +60,6 @@ class FamilieDosmerConfigFlow(ConfigFlow, domain=DOMAIN):
                 errors["base"] = "unknown"
 
             if not errors:
-                self._host = user_input["host"]
                 self._token = user_input["token"]
                 families = self._profile.get("families", [])
 
@@ -78,7 +73,6 @@ class FamilieDosmerConfigFlow(ConfigFlow, domain=DOMAIN):
                     return self.async_create_entry(
                         title="FamilieDosmer",
                         data={
-                            "host": self._host,
                             "token": self._token,
                             "family_ids": family_ids,
                             "family_names": family_names,
@@ -92,7 +86,6 @@ class FamilieDosmerConfigFlow(ConfigFlow, domain=DOMAIN):
             step_id="user",
             data_schema=vol.Schema(
                 {
-                    vol.Required("host"): str,
                     vol.Required("token"): str,
                 }
             ),
@@ -119,7 +112,6 @@ class FamilieDosmerConfigFlow(ConfigFlow, domain=DOMAIN):
                 return self.async_create_entry(
                     title="FamilieDosmer",
                     data={
-                        "host": self._host,
                         "token": self._token,
                         "family_ids": selected_ids,
                         "family_names": family_names,
@@ -159,9 +151,7 @@ class FamilieDosmerConfigFlow(ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             try:
-                await self._validate_credentials(
-                    user_input["host"], user_input["token"]
-                )
+                await self._validate_credentials(user_input["token"])
             except CannotConnect:
                 errors["base"] = "cannot_connect"
             except InvalidAuth:
@@ -171,7 +161,6 @@ class FamilieDosmerConfigFlow(ConfigFlow, domain=DOMAIN):
 
             if not errors and self._reauth_entry:
                 new_data = {**self._reauth_entry.data}
-                new_data["host"] = user_input["host"]
                 new_data["token"] = user_input["token"]
                 self.hass.config_entries.async_update_entry(
                     self._reauth_entry, data=new_data
@@ -181,20 +170,12 @@ class FamilieDosmerConfigFlow(ConfigFlow, domain=DOMAIN):
                 )
                 return self.async_abort(reason="reauth_successful")
 
-        current_host = (
-            self._reauth_entry.data.get("host", "")
-            if self._reauth_entry
-            else ""
-        )
-
         return self.async_show_form(
             step_id="reauth_confirm",
             data_schema=vol.Schema(
                 {
-                    vol.Required("host", default=current_host): str,
                     vol.Required("token"): str,
                 }
             ),
-            description_placeholders={"host": current_host},
             errors=errors,
         )

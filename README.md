@@ -31,10 +31,9 @@ Copy the `custom_components/familiedosmer/` folder into your Home Assistant `cus
 
 1. Go to **Settings** → **Devices & Services** → **Add Integration**
 2. Search for **FamilieDosmer** and select it
-3. Enter your FamilieDosmer host URL (e.g. `https://familiedosmer.example.com`)
-4. Enter your Personal Access Token (PAT) — obtain it from **Min profil** → **API-adgangstokens** in FamilieDosmer
-5. Select which families to integrate
-6. Click **Submit**
+3. Enter your Personal Access Token (PAT) — obtain it from **Min profil** → **API-adgangstokens** in FamilieDosmer
+4. Select which families to integrate
+5. Click **Submit**
 
 ## Required Token Scopes
 

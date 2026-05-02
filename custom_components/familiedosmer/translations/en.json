@@ -3,9 +3,8 @@
     "step": {
       "user": {
         "title": "Connect to FamilieDosmer",
-        "description": "Enter your FamilieDosmer host URL and Personal Access Token.\n\nYou can create a token under Min profil \u2192 API-adgangstokens in the FamilieDosmer app.",
+        "description": "Enter your Personal Access Token from FamilieDosmer.\n\nYou can create a token under Min profil \u2192 API-adgangstokens in the FamilieDosmer app.",
         "data": {
-          "host": "Host",
           "token": "Personal Access Token"
         }
       },
@@ -18,15 +17,14 @@
       },
       "reauth_confirm": {
         "title": "Reauthenticate FamilieDosmer",
-        "description": "The API token for {host} has expired or is no longer valid. Enter a new token to restore access.",
+        "description": "Your API token has expired or is no longer valid. Enter a new token to restore access.",
         "data": {
-          "host": "Host",
           "token": "Personal Access Token"
         }
       }
     },
     "error": {
-      "cannot_connect": "Cannot connect to FamilieDosmer. Verify the host URL is correct and reachable.",
+      "cannot_connect": "Cannot connect to FamilieDosmer. Please try again later.",
       "invalid_auth": "Authentication failed. Verify your Personal Access Token.",
       "unknown": "An unexpected error occurred.",
       "at_least_one_family": "Please select at least one family."

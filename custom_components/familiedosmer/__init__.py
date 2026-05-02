@@ -23,7 +23,7 @@ _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     session = async_get_clientsession(hass)
-    api = FamilieDosmerApi(session, entry.data["host"], entry.data["token"])
+    api = FamilieDosmerApi(session, entry.data["token"])
 
     coordinators: dict[str, dict[str, object]] = {}
     for family_id in entry.data["family_ids"]:

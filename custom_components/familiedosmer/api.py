@@ -4,7 +4,7 @@ from typing import Any
 
 import aiohttp
 
-BASE = "/api/v1"
+BASE_URL = "https://www.familiedosmer.dk/api/v1"
 
 
 class FamilieDosmerApiError(Exception):
@@ -18,11 +18,9 @@ class FamilieDosmerAuthError(FamilieDosmerApiError):
 class FamilieDosmerApi:
     """Thin async client around the FamilieDosmer /api/v1/ endpoints."""
 
-    def __init__(
-        self, session: aiohttp.ClientSession, host: str, token: str
-    ) -> None:
+    def __init__(self, session: aiohttp.ClientSession, token: str) -> None:
         self._session = session
-        self._base = host.rstrip("/") + BASE
+        self._base = BASE_URL
         self._headers = {"Authorization": f"Bearer {token}"}
 
     async def _get(
