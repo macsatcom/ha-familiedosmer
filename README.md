@@ -1,6 +1,10 @@
 # FamilieDosmer for Home Assistant
 
-Custom integration that brings FamilieDosmer's shopping lists, todo lists, and meal plan into Home Assistant.
+[FamilieDosmer](https://www.familiedosmer.dk/) is a Danish app for families that brings order to everyday chaos. Shared shopping lists, chore tracking with recurring schedules, weekly meal planning — all in one place.
+
+This custom integration connects [FamilieDosmer](https://www.familiedosmer.dk/) to Home Assistant, syncing your shopping lists, todo lists, and meal plan as native Home Assistant entities.
+
+[FamilieDosmer &rarr;](https://www.familiedosmer.dk/) &nbsp; [Marketing &rarr;](https://www.familiedosmer.dk/docs/marketing.html) &nbsp; [Manual &rarr;](https://www.familiedosmer.dk/docs/manual.html)
 
 ## Features
 
