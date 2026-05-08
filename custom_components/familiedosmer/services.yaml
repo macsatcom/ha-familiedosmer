@@ -1,0 +1,147 @@
+log_done:
+  name: Log done entry
+  description: Logs a completed task for a family member.
+  target:
+    entity:
+      integration: familiedosmer
+  fields:
+    email:
+      name: Email
+      description: Email of the family member who completed the task.
+      required: true
+      example: "user@example.com"
+      selector:
+        text:
+    item:
+      name: Item
+      description: Description of what was completed.
+      required: true
+      example: "Tømmet opvaskemaskinen"
+      selector:
+        text:
+    details:
+      name: Details
+      description: Additional notes about the completed task.
+      required: false
+      example: "Også sat i gang en ny runde"
+      selector:
+        text:
+        multiline: true
+
+add_shopping_item:
+  name: Add shopping item
+  description: Adds an item to a shopping list.
+  target:
+    entity:
+      integration: familiedosmer
+  fields:
+    name:
+      name: Name
+      description: Item name.
+      required: true
+      example: "Æbler"
+      selector:
+        text:
+    quantity:
+      name: Quantity
+      description: Number of units.
+      required: false
+      example: 6
+      selector:
+        number:
+          min: 0
+          step: 0.5
+          mode: box
+    unit:
+      name: Unit
+      description: Unit of measurement (e.g., L, stk, kg).
+      required: false
+      example: "stk"
+      selector:
+        text:
+    category:
+      name: Category
+      description: Item category (e.g., Mejeri, Frugt & Grønt).
+      required: false
+      example: "Frugt & Grønt"
+      selector:
+        text:
+
+update_shopping_item:
+  name: Update shopping item
+  description: Updates a shopping list item (check/uncheck, rename, change quantity).
+  target:
+    entity:
+      integration: familiedosmer
+  fields:
+    item_id:
+      name: Item ID
+      description: The ID of the item to update.
+      required: true
+      example: "sli_abc"
+      selector:
+        text:
+    checked:
+      name: Checked
+      description: Whether the item is checked/completed.
+      required: false
+      selector:
+        boolean:
+    name:
+      name: Name
+      description: New item name.
+      required: false
+      selector:
+        text:
+    quantity:
+      name: Quantity
+      description: New quantity.
+      required: false
+      selector:
+        number:
+          min: 0
+          step: 0.5
+          mode: box
+    unit:
+      name: Unit
+      description: New unit.
+      required: false
+      selector:
+        text:
+
+delete_shopping_item:
+  name: Delete shopping item
+  description: Removes an item from a shopping list.
+  target:
+    entity:
+      integration: familiedosmer
+  fields:
+    item_id:
+      name: Item ID
+      description: The ID of the item to delete.
+      required: true
+      example: "sli_abc"
+      selector:
+        text:
+
+update_todo_item:
+  name: Update todo item
+  description: Marks a todo list item as completed or uncompleted.
+  target:
+    entity:
+      integration: familiedosmer
+  fields:
+    item_id:
+      name: Item ID
+      description: The ID of the item to update.
+      required: true
+      example: "item_abc"
+      selector:
+        text:
+    completed:
+      name: Completed
+      description: Whether the item is completed.
+      required: false
+      default: true
+      selector:
+        boolean:
