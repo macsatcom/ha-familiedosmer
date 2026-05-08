@@ -1,9 +1,6 @@
 log_done:
   name: Log done entry
   description: Logs a completed task for a family member.
-  target:
-    entity:
-      integration: familiedosmer
   fields:
     email:
       name: Email

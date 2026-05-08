@@ -59,8 +59,9 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
     """Register global services."""
 
     async def handle_log_done(call: ServiceCall) -> None:
-        apis = _resolve_entity_target(hass, call.data["entity_id"])
-        for api, family_id, _ in apis:
+        for entry_id in hass.data[DOMAIN]:
+            api = hass.data[DOMAIN][entry_id][DATA_KEY_API]
+            family_id = hass.config_entries.async_get_entry(entry_id).data[DATA_KEY_FAMILY_ID]
             await api.create_done_entry(
                 family_id,
                 call.data["email"],
@@ -120,7 +121,6 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
         SERVICE_LOG_DONE,
         handle_log_done,
         schema=vol.Schema({
-            vol.Required("entity_id"): cv.entity_ids,
             vol.Required("email"): str,
             vol.Required("item"): str,
             vol.Optional("details"): str,
