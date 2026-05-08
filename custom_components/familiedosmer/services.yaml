@@ -26,7 +26,7 @@ log_done:
       example: "Også sat i gang en ny runde"
       selector:
         text:
-        multiline: true
+          multiline: true
 
 add_shopping_item:
   name: Add shopping item
