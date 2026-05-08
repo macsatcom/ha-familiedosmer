@@ -136,3 +136,16 @@ class FamilieDosmerApi:
             params={"from": from_date, "to": to_date},
         )
         return data["entries"]
+
+    async def create_done_entry(
+        self,
+        family_id: str,
+        email: str,
+        item: str,
+        details: str | None = None,
+    ) -> dict[str, Any]:
+        """POST /api/v1/families/:familyId/done"""
+        body: dict[str, Any] = {"email": email, "item": item}
+        if details:
+            body["details"] = details
+        return await self._post(f"/families/{family_id}/done", body)

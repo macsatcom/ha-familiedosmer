@@ -15,7 +15,12 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import COORDINATOR_SHOPPING, COORDINATOR_TODO, DOMAIN, DATA_KEY_COORDINATORS
+from .const import (
+    COORDINATOR_SHOPPING,
+    COORDINATOR_TODO,
+    DATA_KEY_FAMILY_ID,
+    DOMAIN,
+)
 from .coordinator import ShoppingCoordinator, TodoCoordinator
 
 
@@ -24,33 +29,27 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    coordinators = hass.data[DOMAIN][entry.entry_id][DATA_KEY_COORDINATORS]
-    family_names = entry.data.get("family_names", {})
+    family_id = entry.data[DATA_KEY_FAMILY_ID]
+    family_name = entry.data.get("family_name", family_id)
+
+    shop_coord: ShoppingCoordinator = hass.data[DOMAIN][entry.entry_id][COORDINATOR_SHOPPING]
+    todo_coord: TodoCoordinator = hass.data[DOMAIN][entry.entry_id][COORDINATOR_TODO]
 
     entities: list[TodoListEntity] = []
 
-    for family_id, family_coords in coordinators.items():
-        family_name = family_names.get(family_id, family_id)
-
-        shop_coord: ShoppingCoordinator = family_coords[COORDINATOR_SHOPPING]
-        shop_data = shop_coord.data or {}
-        for list_id, list_data in shop_data.items():
-            list_name = list_data["list"]["name"]
-            entities.append(
-                FamilieDosmerShoppingList(
-                    shop_coord, family_id, list_id, list_name, family_name
-                )
+    for list_id, list_data in (shop_coord.data or {}).items():
+        entities.append(
+            FamilieDosmerShoppingList(
+                shop_coord, family_id, list_id, list_data["list"]["name"], family_name
             )
+        )
 
-        todo_coord: TodoCoordinator = family_coords[COORDINATOR_TODO]
-        todo_data = todo_coord.data or {}
-        for list_id, list_data in todo_data.items():
-            list_name = list_data["list"]["name"]
-            entities.append(
-                FamilieDosmerTodoList(
-                    todo_coord, family_id, list_id, list_name, family_name
-                )
+    for list_id, list_data in (todo_coord.data or {}).items():
+        entities.append(
+            FamilieDosmerTodoList(
+                todo_coord, family_id, list_id, list_data["list"]["name"], family_name
             )
+        )
 
     async_add_entities(entities)
 

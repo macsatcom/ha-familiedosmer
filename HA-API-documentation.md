@@ -24,13 +24,14 @@ Authorization: Bearer <your-token>
 Each token is limited to the scopes you select at creation:
 
 | Scope | Description |
-|---|---|
+|---|---|---|
 | `profile:read` | Read user profile and family memberships |
 | `todos:read` | Read todo lists and items |
 | `todos:write` | Mark todo items as completed/uncompleted |
 | `shopping:read` | Read shopping lists and items |
 | `shopping:write` | Add, update, and delete shopping items |
 | `mealplan:read` | Read the meal plan |
+| `done:write` | Log completed tasks for family members |
 
 ### Error Responses
 
@@ -302,6 +303,8 @@ Returns the meal plan for a date range.
 **Response:**
 ```json
 {
+  "id": "mp_xyz",
+  "familyId": "fam_abc",
   "entries": [
     {
       "id": "mp_abc",
@@ -310,10 +313,7 @@ Returns the meal plan for a date range.
       "customName": null,
       "recipe": {
         "id": "rec_abc",
-        "title": "Spaghetti Bolognese",
-        "servings": 4,
-        "imageUrl": "https://...",
-        "tags": ["pasta", "kød"]
+        "title": "Spaghetti Bolognese"
       }
     },
     {
@@ -328,6 +328,45 @@ Returns the meal plan for a date range.
 ```
 
 **`mealType` values:** `breakfast` | `lunch` | `dinner` | `snack`
+
+---
+
+## Done Entries
+
+### POST `/api/v1/families/:familyId/done`
+
+Creates a "done entry" — logs a completed task for a family member. This is used to record things family members have accomplished, typically triggered from Home Assistant automations.
+
+**Required scope:** `done:write`
+
+**Notes:**
+- Only users with `userGroups` containing `internal` can use this endpoint
+- The target user is identified by their **email** (must be a member of the family)
+
+**Request body:**
+```json
+{
+  "email": "user@example.com",
+  "item": "Tømmet opvaskemaskinen",
+  "details": "Også sat i gang en ny runde"
+}
+```
+
+**Response:** `201 Created`
+```json
+{
+  "id": "de_abc",
+  "familyId": "fam_xyz789",
+  "userId": "usr_abc123",
+  "title": "Tømmet opvaskemaskinen",
+  "note": "Også sat i gang en ny runde",
+  "completedAt": "2026-05-08T14:30:00.000Z",
+  "user": {
+    "id": "usr_abc123",
+    "displayName": "Anders"
+  }
+}
+```
 
 ---
 
@@ -553,6 +592,12 @@ class FamilieDosmerApi:
             params={"from": from_date, "to": to_date}
         )
         return data["entries"]
+
+    async def create_done_entry(self, family_id: str, email: str, item: str, details: str | None = None):
+        body = {"email": email, "item": item}
+        if details:
+            body["details"] = details
+        return await self._post(f"/families/{family_id}/done", body)
 ```
 
 ---
@@ -795,7 +840,7 @@ Never raise bare exceptions from `_async_update_data` — always wrap in `Update
 
 ### Recommended Setup
 
-1. Create a token with these scopes: `profile:read`, `shopping:read`, `shopping:write`, `todos:read`, `todos:write`, `mealplan:read`
+1. Create a token with these scopes: `profile:read`, `shopping:read`, `shopping:write`, `todos:read`, `todos:write`, `mealplan:read`, `done:write`
 2. Store the token in your HA `secrets.yaml`:
    ```yaml
    familiedosmer_token: "your-64-char-hex-token"

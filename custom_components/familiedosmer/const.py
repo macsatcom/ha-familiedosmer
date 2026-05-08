@@ -4,13 +4,18 @@ DOMAIN = "familiedosmer"
 
 PLATFORMS = ["todo", "calendar", "sensor"]
 
-COORDINATOR_SHOPPING = "shopping"
-COORDINATOR_TODO = "todo"
-COORDINATOR_MEALPLAN = "mealplan"
+COORDINATOR_SHOPPING = "coordinator_shopping"
+COORDINATOR_TODO = "coordinator_todo"
+COORDINATOR_MEALPLAN = "coordinator_mealplan"
 
 DATA_KEY_API = "api"
-DATA_KEY_SESSION = "session"
-DATA_KEY_COORDINATORS = "coordinators"
+DATA_KEY_FAMILY_ID = "family_id"
+
+SERVICE_LOG_DONE = "log_done"
+SERVICE_ADD_SHOPPING = "add_shopping_item"
+SERVICE_UPDATE_SHOPPING = "update_shopping_item"
+SERVICE_DELETE_SHOPPING = "delete_shopping_item"
+SERVICE_UPDATE_TODO = "update_todo_item"
 
 MEAL_TYPE_LABELS = {
     "breakfast": "Morgenmad",
@@ -26,4 +31,5 @@ SCOPE_NAMES = {
     "shopping:read": "Shopping lists read",
     "shopping:write": "Shopping lists write",
     "mealplan:read": "Meal plan read",
+    "done:write": "Done entries write",
 }

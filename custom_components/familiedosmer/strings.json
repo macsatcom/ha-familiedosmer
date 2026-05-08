@@ -9,10 +9,10 @@
         }
       },
       "families": {
-        "title": "Select Families",
-        "description": "Choose which families to integrate with Home Assistant.",
+        "title": "Select Family",
+        "description": "Choose the family to integrate with Home Assistant.",
         "data": {
-          "families": "Families"
+          "family": "Family"
         }
       },
       "reauth_confirm": {

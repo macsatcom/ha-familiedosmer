@@ -5,6 +5,7 @@ from typing import Any
 import voluptuous as vol
 
 from homeassistant.config_entries import ConfigFlow, ConfigEntry
+from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import config_validation as cv
@@ -25,7 +26,7 @@ class InvalidAuth(HomeAssistantError):
 class FamilieDosmerConfigFlow(ConfigFlow, domain=DOMAIN):
     """Handle a config flow for FamilieDosmer."""
 
-    VERSION = 1
+    VERSION = 2
 
     def __init__(self) -> None:
         self._token: str = ""
@@ -63,20 +64,13 @@ class FamilieDosmerConfigFlow(ConfigFlow, domain=DOMAIN):
                 self._token = user_input["token"]
                 families = self._profile.get("families", [])
 
-                if len(families) <= 1:
-                    family_ids = [families[0]["id"]] if families else []
-                    family_names = (
-                        {families[0]["id"]: families[0]["name"]}
-                        if families
-                        else {}
-                    )
+                if len(families) == 1:
                     return self.async_create_entry(
-                        title="FamilieDosmer",
+                        title=families[0]["name"],
                         data={
                             "token": self._token,
-                            "family_ids": family_ids,
-                            "family_names": family_names,
-                            "families": families,
+                            "family_id": families[0]["id"],
+                            "family_name": families[0]["name"],
                         },
                     )
 
@@ -99,27 +93,21 @@ class FamilieDosmerConfigFlow(ConfigFlow, domain=DOMAIN):
         families = self._profile.get("families", [])
 
         if user_input is not None:
-            selected_ids = user_input.get("families", [])
-            if not selected_ids:
-                errors["families"] = "at_least_one_family"
-
+            selected_id = user_input.get("family")
+            if not selected_id:
+                errors["family"] = "at_least_one_family"
             if not errors:
-                family_names = {}
-                for f in families:
-                    if f["id"] in selected_ids:
-                        family_names[f["id"]] = f["name"]
-
+                selected = next(f for f in families if f["id"] == selected_id)
                 return self.async_create_entry(
-                    title="FamilieDosmer",
+                    title=selected["name"],
                     data={
                         "token": self._token,
-                        "family_ids": selected_ids,
-                        "family_names": family_names,
-                        "families": families,
+                        "family_id": selected["id"],
+                        "family_name": selected["name"],
                     },
                 )
 
-        family_select = {
+        family_options = {
             f["id"]: f"{f['name']} ({f.get('role', '')})"
             for f in families
         }
@@ -128,9 +116,7 @@ class FamilieDosmerConfigFlow(ConfigFlow, domain=DOMAIN):
             step_id="families",
             data_schema=vol.Schema(
                 {
-                    vol.Required("families", default=list(family_select.keys())): cv.multi_select(
-                        family_select
-                    ),
+                    vol.Required("family"): vol.In(family_options),
                 }
             ),
             errors=errors,
@@ -179,3 +165,16 @@ class FamilieDosmerConfigFlow(ConfigFlow, domain=DOMAIN):
             ),
             errors=errors,
         )
+
+
+async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
+    """Migrate config entry from version 1 (multi-family) to version 2 (single-family)."""
+    if config_entry.version == 1:
+        data = {**config_entry.data}
+        family_ids: list[str] = data.pop("family_ids", [])
+        family_names: dict[str, str] = data.pop("family_names", {})
+        data.pop("families", None)
+        data["family_id"] = family_ids[0] if family_ids else ""
+        data["family_name"] = family_names.get(data["family_id"], data["family_id"])
+        hass.config_entries.async_update_entry(config_entry, data=data, version=2)
+    return True

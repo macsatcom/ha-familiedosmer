@@ -12,8 +12,8 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
     COORDINATOR_MEALPLAN,
+    DATA_KEY_FAMILY_ID,
     DOMAIN,
-    DATA_KEY_COORDINATORS,
     MEAL_TYPE_LABELS,
 )
 from .coordinator import MealPlanCoordinator
@@ -24,22 +24,13 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    coordinators = hass.data[DOMAIN][entry.entry_id][DATA_KEY_COORDINATORS]
-    family_names = entry.data.get("family_names", {})
+    coordinator: MealPlanCoordinator = hass.data[DOMAIN][entry.entry_id][COORDINATOR_MEALPLAN]
+    family_id = entry.data[DATA_KEY_FAMILY_ID]
+    family_name = entry.data.get("family_name", family_id)
 
-    entities: list[FamilieDosmerMealPlan] = []
-
-    for family_id, family_coords in coordinators.items():
-        family_name = family_names.get(family_id, family_id)
-        entities.append(
-            FamilieDosmerMealPlan(
-                family_coords[COORDINATOR_MEALPLAN],
-                family_id,
-                family_name,
-            )
-        )
-
-    async_add_entities(entities)
+    async_add_entities([
+        FamilieDosmerMealPlan(coordinator, family_id, family_name)
+    ])
 
 
 class FamilieDosmerMealPlan(
@@ -101,7 +92,9 @@ class FamilieDosmerMealPlan(
         )
         description = meal_label
         if recipe:
-            description += f" · {recipe['servings']} pers."
+            servings = recipe.get("servings")
+            if servings:
+                description += f" · {servings} pers."
             tags = recipe.get("tags")
             if tags:
                 description += f" · {', '.join(tags)}"
